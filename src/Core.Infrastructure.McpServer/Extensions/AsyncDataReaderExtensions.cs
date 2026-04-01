@@ -50,7 +50,7 @@ namespace Core.Infrastructure.McpServer.Extensions
             // Limit column width to a reasonable size
             for (int i = 0; i < columnWidths.Count; i++)
             {
-                columnWidths[i] = Math.Min(columnWidths[i], 40);
+                columnWidths[i] = Math.Min(columnWidths[i], 500);
             }
             
             // Build header row
