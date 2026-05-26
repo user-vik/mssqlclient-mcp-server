@@ -594,6 +594,7 @@ namespace Core.Infrastructure.SqlClient
             connection.InfoMessage += (sender, e) => infoMessages.Add(e.Message);
 
             // Enable statistics to capture server-side metrics
+            // Fabric Warehouse rejects SET STATISTICS — swallow that error and continue without stats.
             var statsCommands = new List<string> { "SET STATISTICS TIME ON" };
             if (statisticsOptions?.IncludeIoStats == true)
                 statsCommands.Add("SET STATISTICS IO ON");
@@ -603,7 +604,13 @@ namespace Core.Infrastructure.SqlClient
             using (var statsCommand = new SqlCommand(string.Join("; ", statsCommands), connection))
             {
                 statsCommand.CommandTimeout = timeoutSeconds ?? _configuration.DefaultCommandTimeoutSeconds;
-                await statsCommand.ExecuteNonQueryAsync(cancellationToken);
+                try
+                {
+                    await statsCommand.ExecuteNonQueryAsync(cancellationToken);
+                }
+                catch (SqlException)
+                {
+                }
             }
 
             // Execute the query
@@ -1339,6 +1346,7 @@ namespace Core.Infrastructure.SqlClient
                 connection.InfoMessage += (sender, e) => infoMessages.Add(e.Message);
 
                 // Enable statistics to capture server-side metrics
+                // Fabric Warehouse rejects SET STATISTICS — swallow that error and continue without stats.
                 var statsCommands = new List<string> { "SET STATISTICS TIME ON" };
                 if (statisticsOptions?.IncludeIoStats == true)
                     statsCommands.Add("SET STATISTICS IO ON");
@@ -1348,7 +1356,13 @@ namespace Core.Infrastructure.SqlClient
                 using (var statsCommand = new SqlCommand(string.Join("; ", statsCommands), connection))
                 {
                     statsCommand.CommandTimeout = timeoutSeconds ?? _configuration.DefaultCommandTimeoutSeconds;
-                    await statsCommand.ExecuteNonQueryAsync(cancellationToken);
+                    try
+                    {
+                        await statsCommand.ExecuteNonQueryAsync(cancellationToken);
+                    }
+                    catch (SqlException)
+                    {
+                    }
                 }
 
                 // Create and configure command
